@@ -1,0 +1,66 @@
+version: "2"
+
+services:
+  iri:
+    container_name: iota_iri
+    image: muxxer/rock64_iota_iri:latest
+    hostname: iri
+    restart: unless-stopped
+    volumes:
+      - ./volumes/iri/iota.ini:/iri/iota.ini:ro
+      - ./volumes/iri/ixi:/iri/ixi:rw
+      - ./volumes/iri/mainnetdb:/iri/mainnetdb:rw
+      - /etc/localtime:/etc/localtime:ro
+    command: ["/usr/bin/java", "-XX:+DisableAttachMechanism", "-Xmx4g", "-Xms256m", "-Dlogback.configurationFile=/iri/conf/logback.xml", "-Djava.net.preferIPv4Stack=true", "-jar", "iri.jar", "-c", "/iri.iota.ini"]
+    ports:
+      - "14600:14600/udp"
+      - "15600:15600/tcp"
+      - "14265:14265"
+    logging:
+      options:
+        max-size: 1m
+    
+  nelson.cli:
+    container_name: iota_nelson.cli
+    image: muxxer/rock64_nelson.cli:latest
+    hostname: nelson.cli
+    restart: unless-stopped
+    volumes:
+      - ./volumes/nelson.cli/data:/data:rw
+      - ./volumes/nelson.cli/config.ini:/home/node/config.ini:ro
+      - /etc/localtime:/etc/localtime:ro
+    command: "--config /home/node/config.ini"
+    ports:
+      - "18600:18600"
+      - "16600:16600"
+    logging:
+      options:
+        max-size: 1m
+
+  nelson.gui:
+    container_name: iota_nelson.gui
+    image: muxxer/rock64_nelson.gui:latest
+    hostname: nelson.gui
+    restart: unless-stopped
+    command: "--apiHostname nelson.cli"
+    ports:
+      - "5000:5000"
+    logging:
+      options:
+        max-size: 1m
+
+  field.cli:
+    container_name: iota_field.cli
+    image: muxxer/rock64_field.cli:latest
+    hostname: field.cli
+    restart: unless-stopped
+    volumes:
+      - ./volumes/field.cli/config.ini:/usr/src/field/config.ini:ro
+      - ./volumes/field.cli/root:/root
+      - /etc/localtime:/etc/localtime:ro
+    command: "--config /usr/src/field/config.ini"
+    ports:
+      - "21310:21310"
+    logging:
+      options:
+        max-size: 1m
