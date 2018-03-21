@@ -1,7 +1,7 @@
 #/bin/bash
 # Automatically pull and update new container version
 echo "##############################################"
-echo "# rock64-iota update script				   #"
+echo "# rock64-iota update script                  #"
 echo "##############################################"
 
 echo "##############################################"
