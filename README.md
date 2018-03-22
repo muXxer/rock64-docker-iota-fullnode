@@ -18,9 +18,10 @@ The Dockerfiles used to build the included containers can be found [here](https:
   + [2.8 Open the following ports in your firewall for the ROCK64 ip address](#28-open-the-following-ports-in-your-firewall-for-the-rock64-ip-address)
 * [3. Usage](#3-usage)
   + [3.1 Start the node](#31-start-the-node)
-  + [3.2 Check the logs](#32-check-the-logs)
-  + [3.3 Open Nelson GUI](#33-open-nelson-gui)
-  + [3.4 Update when a new release of any container is published](#34-update-when-a-new-release-of-any-container-is-published)
+  + [3.2 Container Status](#32-container-status)
+  + [3.3 Check the logs](#33-check-the-logs)
+  + [3.4 Open Nelson GUI](#34-open-nelson-gui)
+  + [3.5 Update when a new release of any container is published](#35-update-when-a-new-release-of-any-container-is-published)
 * [4. Warnings](#4-warnings)
   + [4.1 Ports](#41-ports)
   + [4.2 IRI Remote API limits](#42-iri-remote-api-limits)
@@ -97,6 +98,11 @@ sudo apt update && sudo apt dist-upgrade
 ```sh
 sudo dpkg-reconfigure tzdata
 sudo dpkg-reconfigure locales
+```
+
+- Add yourself to the docker group
+```sh
+sudo adduser ${USER} docker
 ```
 
 - Get the UUID of the external drive (should be something like `/dev/sda`)
@@ -224,7 +230,15 @@ Run it with:
 ```sh
 docker-compose up -d
 ```
-### 3.2 Check the logs
+
+### 3.2 Container Status
+
+Check if the docker container are up and running
+```sh
+docker ps
+```
+
+### 3.3 Check the logs
 
 Check the IRI logs with
 ```sh
@@ -236,14 +250,14 @@ Check the Nelson logs with
 docker logs iota_nelson.cli
 ```
 
-### 3.3 Open Nelson GUI
+### 3.4 Open Nelson GUI
 
 Open your browser to
 ```http
 http://YOUR-ROCK64-IP:5000/
 ```
 
-### 3.4 Update when a new release of any container is published
+### 3.5 Update when a new release of any container is published
 
 This update script will pull all containers if updated or not and stop/remove/start **all containers**
 
