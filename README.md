@@ -4,32 +4,37 @@ This repository contains the `docker-compose.yml` for IOTA IRI on ROCK64 includi
 The Dockerfiles used to build the included containers can be found [here](https://github.com/muXxer/rock64-docker-iota-fullnode-dockerfiles).
 
 ## Table of contents
-* [1. WARNING](#1-warning)
-* [2. Install guide](#2-install-guide)
-  + [2.1 My hardware part list](#21-my-hardware-part-list)
-  + [2.2 Downloading the linux image to the SD card](#22-downloading-the-linux-image-to-the-sd-card)
-  + [2.3 First steps on the ROCK64](#23-first-steps-on-the-rock64)
-  + [2.4 Download this repository](#24-download-this-repository)
-  + [2.5 Install latest linux kernel image from ayufan](#25-install-latest-linux-kernel-image-from-ayufan)
-  + [2.6 Change the IOTA configuration files to fit your needs](#26-change-the-iota-configuration-files-to-fit-your-needs)
-        + [2.6.1 Change the Nelson config.ini](#261-change-the-nelson-configini)
-        + [2.6.2 Change the Field config.ini](#262-change-the-field-configini)
-  + [2.7 Download the IOTA mainnet database](#27-download-the-iota-mainnet-database)
-  + [2.8 Open the following ports in your firewall for the ROCK64 ip address](#28-open-the-following-ports-in-your-firewall-for-the-rock64-ip-address)
-* [3. Usage](#3-usage)
-  + [3.1 Start the node](#31-start-the-node)
-  + [3.2 Container Status](#32-container-status)
-  + [3.3 Check the logs](#33-check-the-logs)
-  + [3.4 Open Nelson GUI](#34-open-nelson-gui)
-  + [3.5 Update when a new release of any container is published](#35-update-when-a-new-release-of-any-container-is-published)
-* [4. Warnings](#4-warnings)
-  + [4.1 Ports](#41-ports)
-  + [4.2 IRI Remote API limits](#42-iri-remote-api-limits)
-* [5. More information](#5-more-information)
-* [6. Author](#6-author)
-* [7. Special thanks to](#7-special-thanks-to)
-* [8. License](#8-license)
-* [9. Donations](#9-donations)
+- [rock64-docker-iota-fullnode](#rock64-docker-iota-fullnode)
+  * [Table of contents](#table-of-contents)
+  * [1. WARNING](#1-warning)
+  * [2. Install guide](#2-install-guide)
+    + [2.1 My hardware part list](#21-my-hardware-part-list)
+    + [2.2 Downloading the linux image to the SD card](#22-downloading-the-linux-image-to-the-sd-card)
+    + [2.3 Move the root file system to an external hard drive (optional)](#23-move-the-root-file-system-to-an-external-hard-drive--optional-)
+    + [2.4 First steps on the ROCK64](#24-first-steps-on-the-rock64)
+    + [2.5 Mount an external hard drive and redirect the docker directory](#25-mount-an-external-hard-drive-and-redirect-the-docker-directory)
+    + [2.6 Create a swap file](#26-create-a-swap-file)
+    + [2.7 Download this repository](#27-download-this-repository)
+    + [2.8 Install latest linux kernel image from ayufan](#28-install-latest-linux-kernel-image-from-ayufan)
+    + [2.9 Change the IOTA configuration files to fit your needs](#29-change-the-iota-configuration-files-to-fit-your-needs)
+        + [2.9.1 Change the Nelson config.ini](#291-change-the-nelson-configini)
+        + [2.9.2 Change the Field config.ini](#292-change-the-field-configini)
+    + [2.10 Download the IOTA mainnet database](#210-download-the-iota-mainnet-database)
+    + [2.11 Open the following ports in your firewall for the ROCK64 ip address](#211-open-the-following-ports-in-your-firewall-for-the-rock64-ip-address)
+  * [3. Usage](#3-usage)
+    + [3.1 Start the node](#31-start-the-node)
+    + [3.2 Container Status](#32-container-status)
+    + [3.3 Check the logs](#33-check-the-logs)
+    + [3.4 Open Nelson GUI](#34-open-nelson-gui)
+    + [3.5 Update when a new release of any container is published](#35-update-when-a-new-release-of-any-container-is-published)
+  * [4. Warnings](#4-warnings)
+    + [4.1 Ports](#41-ports)
+    + [4.2 IRI Remote API limits](#42-iri-remote-api-limits)
+  * [5. More information](#5-more-information)
+  * [6. Author](#6-author)
+  * [7. Special thanks to](#7-special-thanks-to)
+  * [8. License](#8-license)
+  * [9. Donations](#9-donations)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -70,14 +75,70 @@ curl -L `curl -s https://api.github.com/repos/ayufan-rock64/linux-build/releases
  * Choose `ROCK64 - Popcorn hour transformer`
  * Click `Browse image file from local drive`
  * Select your downloaded `ayufan xenial-container` image
+
+### 2.3 Move the root file system to an external hard drive (optional)
+
+This part is a bit tricky, but i think it is worth it. You will have less problems with dying SD cards or overall system speed. Please follow these steps closely!
+
+- Mount the `linux-root` partition of the SD card (e.g. `/media/YOUR-USERNAME/linux-root/`) in your computer before plugging it in the Rock64 for the first time.
+You can easily do this by clicking on the device in your file browser.
+
+- Edit the file `/media/YOUR-USERNAME/linux-root/usr/local/sbin/rock64_first_boot.sh` and remove the following line.
+Otherwise your root filesystem on the external hard drive will be destroyed on first system boot up.
+```diff
+#!/bin/sh
+
+set -x
+
+mkdir -p /var/lib/rock64
+
+if [ ! -e /var/lib/rock64/resized ]; then
+   touch /var/lib/rock64/resized
+-  /usr/local/sbin/resize_rootfs.sh
+fi
+```
+
+- Connect the external hard drive and create an ext4 file system (e.g. description `iota-rock64`) with your favorite tool (e.g. `gnome-disks`).
+- Mount the new partition of the external hard drive (e.g. `/media/YOUR-USERNAME/iota-rock64/`)
+- Copy the root file system from the SD card to the external hard drive with the following command:
+```sh
+sudo rsync -avPE /media/YOUR-USERNAME/linux-root/ /media/YOUR-USERNAME/iota-rock64/
+```
+
+- Mount the `boot` partition of the SD card (e.g. `/media/YOUR-USERNAME/boot/`)
+- Get the UUID of the external hard drive (e.g. `3babfcac-8603-4ae8-a4cb-f5932f00640b`)
+```sh
+sudo blkid
+```
+- Edit the file ` /media/YOUR-USERNAME/boot/extlinux/extlinux.conf ` and change the following lines according to your UUID.
+```diff
+timeout 30
+default kernel-latest
+menu title select kernel
+
+label kernel-latest
+    kernel /Image
+    initrd /initrd.img
+    fdt /dtb
+-   append rw root=LABEL=linux-root rootwait rootfstype=ext4 panic=10 init=/sbin/init coherent_pool=1M ethaddr=${ethaddr} eth1addr=${eth1addr} serial=${serial#} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1
++   append rw root=UUID=YOUR-OWN-UUID rootwait rootfstype=ext4 panic=10 init=/sbin/init coherent_pool=1M ethaddr=${ethaddr} eth1addr=${eth1addr} serial=${serial#} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1
+
+label kernel-previous
+    kernel /Image.bak
+    initrd /initrd.img.bak
+    fdt /dtb.bak
+-   append rw root=LABEL=linux-root rootwait rootfstype=ext4 panic=10 init=/sbin/init coherent_pool=1M ethaddr=${ethaddr} eth1addr=${eth1addr} serial=${serial#} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1
++   append rw root=UUID=YOUR-OWN-UUID rootwait rootfstype=ext4 panic=10 init=/sbin/init coherent_pool=1M ethaddr=${ethaddr} eth1addr=${eth1addr} serial=${serial#} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1
+```
+
+### 2.4 First steps on the ROCK64
+
 - Insert the SD card into your ROCK64
 - Power on the ROCK64
 - Get the IP address of the ROCK64 from your router or log in to the shell with an external screen and a usb keyboard (user: rock64, pw: rock64)
 ```sh
 hostname -I
 ```
-
-### 2.3 First steps on the ROCK64
 
 - Log in via ssh from your computer
 ```sh
@@ -103,39 +164,6 @@ sudo dpkg-reconfigure locales
 - Add yourself to the docker group
 ```sh
 sudo adduser ${USER} docker
-```
-
-- Get the UUID of the external drive (should be something like `/dev/sda`)
-```sh
-sudo blkid
-```
-
-- Create a target directory for the external drive
-```sh
-sudo mkdir -p /mnt/my_ext_drive/
-```
-
-- Add the external drive to your `/etc/fstab`
-```sh
-sudo nano /etc/fstab
-```
-Add the following line (depending on your UUID, target directory, file system)
-```
-UUID=YOUR-OWN-UUID /mnt/my_ext_drive ext4 defaults,discard 0 2
-```
-
-- Mount the new device
-```sh
-sudo mount -a
-```
-
-- Redirect docker containers to your external drive with a symlink
-```sh
-sudo systemctl stop docker
-sudo mv /var/lib/docker /mnt/my_ext_drive/docker
-sudo ln -s /mnt/my_ext_drive/docker /var/lib/docker
-sudo chown -R root:root /mnt/my_ext_drive/docker
-sudo systemctl start docker
 ```
 
 - Copy your ssh key from your computer to the ROCK64
@@ -165,23 +193,101 @@ PermitRootLogin no
 sudo systemctl restart sshd
 ```
 
-### 2.4 Download this repository
+### 2.5 Mount an external hard drive and redirect the docker directory
+
+The following steps are **only necessary** if you didn't move the root file system to the external drive. See [Step 2.3](#23-move-the-root-file-system-to-an-external-hard-drive--optional-)
+
+- Get the UUID of the external drive (should be something like `/dev/sda`)
+```sh
+sudo blkid
+```
+
+- Create a target directory for the external drive
+```sh
+sudo mkdir -p /mnt/my_ext_drive/
+```
+
+- Add the external drive to your `/etc/fstab`
+```sh
+sudo nano /etc/fstab
+```
+
+- Add the following line (depending on your UUID, target directory, file system)
+```diff
++UUID=YOUR-OWN-UUID /mnt/my_ext_drive ext4 defaults,discard 0 2
+```
+
+- Mount the new device
+```sh
+sudo mount -a
+```
+
+- Redirect docker containers to your external drive with a symlink
+```sh
+sudo systemctl stop docker
+sudo mv /var/lib/docker /mnt/my_ext_drive/docker
+sudo ln -s /mnt/my_ext_drive/docker /var/lib/docker
+sudo chown -R root:root /mnt/my_ext_drive/docker
+sudo systemctl start docker
+```
+
+### 2.6 Create a swap file
+
+By creating a swap file the OS is able to let programs exceed the size of available physical memory.
+
+- Create a swap file by executing the following commands
+```
+sudo mkdir -p /var/cache/swap 
+sudo fallocate -l 8G /var/cache/swap/swap0
+sudo chmod 0600 /var/cache/swap/swap0 
+sudo mkswap /var/cache/swap/swap0
+sudo swapon /var/cache/swap/swap0
+```
+
+- Add the swap file to your `/etc/fstab`
+```
+sudo nano /etc/fstab
+```
+
+- Add the following line
+```diff
++/var/cache/swap/swap0 none swap sw 0 0
+```
+
+- Change the swap settings in the system
+```sh
+sudo nano /etc/sysctl.conf
+```
+
+- Add the following lines at the end of the file
+```diff
++vm.swappiness=10
++vm.vfs_cache_pressure=50
+```
+
+- Reload the system settings
+```sh
+sudo sysctl -p
+```
+
+### 2.7 Download this repository
 Go to a directory mounted on the external drive and clone this repository (needs disk space because of IOTA mainnet database)
 ```sh
 git clone https://github.com/muXxer/rock64-docker-iota-fullnode.git
 cd rock64-docker-iota-fullnode/
 ```
 
-### 2.5 Install latest linux kernel image from ayufan
+### 2.8 Install latest linux kernel image from ayufan
 The shipped kernel had some problems on my ROCK64 with the Ethernet PHY (error messages in dmesg) and the device got quite warm.
-I had no problems at all with the latest kernel from ayufan. Install it with the following commands:
+I had no problems at all with the latest kernel from ayufan (except HDMI output, but i only use SSH, so that's no problem).
+Install it with the following commands:
 ```sh
 chmod +x install_latest_linux_kernel.sh
 ./install_latest_linux_kernel.sh
 ```
 
-### 2.6 Change the IOTA configuration files to fit your needs 
-#### 2.6.1 Change the Nelson config.ini
+### 2.9 Change the IOTA configuration files to fit your needs 
+#### 2.9.1 Change the Nelson config.ini
 
 Edit the `volumes/nelson.cli/config.ini` file to match your needs, for example the name
 
@@ -191,7 +297,7 @@ Edit the `volumes/nelson.cli/config.ini` file to match your needs, for example t
 +name = My awesome nelson node
 ```
 
-#### 2.6.2 Change the Field config.ini
+#### 2.9.2 Change the Field config.ini
 
 Edit the `volumes/field.cli/config.ini` file to match your needs, for example the name
 
@@ -205,14 +311,14 @@ Edit the `volumes/field.cli/config.ini` file to match your needs, for example th
 
 Check your CarrIOTA Field node and donate to IOTA nodes here: http://field.carriota.com
 
-### 2.7 Download the IOTA mainnet database
+### 2.10 Download the IOTA mainnet database
 To download the latest snapshot of the database (faster initial sync) use the following commands:
 ```sh
 chmod +x download_mainnet_db.sh
 ./download_mainnet_db.sh
 ```
 
-### 2.8 Open the following ports in your firewall for the ROCK64 ip address
+### 2.11 Open the following ports in your firewall for the ROCK64 ip address
 - 14600 UDP - IOTA/IRI UDP connection port
 - 15600 TCP - IOTA/IRI TCP connection port
 - 16600 TCP - Nelson.cli TCP connection port
