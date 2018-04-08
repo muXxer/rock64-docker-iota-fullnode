@@ -3,7 +3,11 @@ version: "2"
 services:
   iri:
     container_name: iota_iri
+    # Use the "build" section instead of "image" if you want to build the docker container on your own
     image: muxxer/rock64_iota_iri:latest
+    #build:
+    #  context: ./dockerfiles
+    #  dockerfile: Dockerfile_iri
     hostname: iri
     restart: unless-stopped
     volumes:
@@ -11,7 +15,25 @@ services:
       - ./volumes/iri/ixi:/iri/ixi:rw
       - ./volumes/iri/mainnetdb:/iri/mainnetdb:rw
       - /etc/localtime:/etc/localtime:ro
-    command: ["/usr/bin/java", "-XX:+DisableAttachMechanism", "-Xmx4g", "-Xms256m", "-Dlogback.configurationFile=/iri/conf/logback.xml", "-Djava.net.preferIPv4Stack=true", "-jar", "iri.jar", "-c", "/iri.iota.ini"]
+    command: ["/usr/bin/java",
+              "-XX:+CrashOnOutOfMemoryError",
+              "-XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses",
+              "-XX:+CMSParallelRemarkEnabled",
+              "-XX:+DisableAttachMechanism",
+              "-XX:+UseConcMarkSweepGC",
+              "-XX:+CMSClassUnloadingEnabled",
+              "-XX:MaxMetaspaceSize=30m",
+              "-Xmx4G",
+              #"-Xmx8G",
+              "-Xms256m",
+              #"-Xms2G",
+              "-Dlogback.configurationFile=/iri/conf/logback.xml",
+              "-Djava.net.preferIPv4Stack=true",
+              "-jar",
+              "iri.jar",
+              "-c",
+              "/iri/iota.ini"
+              ]
     ports:
       - "14600:14600/udp"
       - "15600:15600/tcp"
@@ -22,7 +44,11 @@ services:
     
   nelson.cli:
     container_name: iota_nelson.cli
+    # Use the "build" section instead of "image" if you want to build the docker container on your own
     image: muxxer/rock64_nelson.cli:latest
+    #build:
+    #  context: ./dockerfiles
+    #  dockerfile: Dockerfile_nelson.cli
     hostname: nelson.cli
     restart: unless-stopped
     volumes:
@@ -39,7 +65,11 @@ services:
 
   nelson.gui:
     container_name: iota_nelson.gui
+    # Use the "build" section instead of "image" if you want to build the docker container on your own
     image: muxxer/rock64_nelson.gui:latest
+    #build:
+    #  context: ./dockerfiles
+    #  dockerfile: Dockerfile_nelson.gui
     hostname: nelson.gui
     restart: unless-stopped
     command: "--apiHostname nelson.cli"
@@ -51,7 +81,11 @@ services:
 
   field.cli:
     container_name: iota_field.cli
+    # Use the "build" section instead of "image" if you want to build the docker container on your own
     image: muxxer/rock64_field.cli:latest
+    #build:
+    #  context: ./dockerfiles
+    #  dockerfile: Dockerfile_field.cli
     hostname: field.cli
     restart: unless-stopped
     volumes:

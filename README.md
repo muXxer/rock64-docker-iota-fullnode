@@ -1,7 +1,6 @@
 # rock64-docker-iota-fullnode
 
 This repository contains the `docker-compose.yml` for IOTA IRI on ROCK64 including Nelson.cli, Nelson.gui and Field.cli.<br>
-The Dockerfiles used to build the included containers can be found [here](https://github.com/muXxer/rock64-docker-iota-fullnode-dockerfiles).
 
 ## Table of contents
 - [rock64-docker-iota-fullnode](#rock64-docker-iota-fullnode)
@@ -21,6 +20,7 @@ The Dockerfiles used to build the included containers can be found [here](https:
         + [2.9.2 Change the Field config.ini](#292-change-the-field-configini)
     + [2.10 Download the IOTA mainnet database](#210-download-the-iota-mainnet-database)
     + [2.11 Open the following ports in your firewall for the ROCK64 ip address](#211-open-the-following-ports-in-your-firewall-for-the-rock64-ip-address)
+    + [2.12 Build the docker containers on your own](#212-build-the-docker-containers-on-your-own)
   * [3. Usage](#3-usage)
     + [3.1 Start the node](#31-start-the-node)
     + [3.2 Container Status](#32-container-status)
@@ -323,6 +323,20 @@ chmod +x download_mainnet_db.sh
 - 15600 TCP - IOTA/IRI TCP connection port
 - 16600 TCP - Nelson.cli TCP connection port
 - 21310 TCP - Field.cli TCP connection port
+
+### 2.12 Build the docker containers on your own
+Use the `build` sections instead of `image` in the file `docker-compose.yml` if you want to build the docker containers on your own.
+
+```diff
+-    image: muxxer/rock64_iota_iri:latest
++    #image: muxxer/rock64_iota_iri:latest
+-    #build:
+-    #  context: ./dockerfiles
+-    #  dockerfile: Dockerfile_iri
++    build:
++      context: ./dockerfiles
++      dockerfile: Dockerfile_iri
+```
 
 ## 3. Usage
 ### 3.1 Start the node
