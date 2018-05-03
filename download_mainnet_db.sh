@@ -10,6 +10,7 @@ echo "Download latest database..."
 curl http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz -o mainnetdb.tar.gz
 
 echo "Unzip database..."
+mkdir -p volumes/iri/mainnetdb/
 tar xzfv mainnetdb.tar.gz -C volumes/iri/mainnetdb/
 
 echo "Remove downloaded database file..."
