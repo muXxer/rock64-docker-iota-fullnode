@@ -19,10 +19,10 @@ docker-compose stop
 echo "##############################################"
 echo "# Removing all old rock64-iota containers    #"
 echo "##############################################"
-docker-compose rm -f iota_iri
-docker-compose rm -f iota_nelson.cli
-docker-compose rm -f iota_nelson.gui
-docker-compose rm -f iota_field.cli
+docker-compose rm -f iri
+docker-compose rm -f nelson.cli
+docker-compose rm -f nelson.gui
+docker-compose rm -f field.cli
 
 echo "##############################################"
 echo "# Restarting all rock64-iota containers      #"
