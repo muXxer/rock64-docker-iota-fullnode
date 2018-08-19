@@ -8,13 +8,13 @@ services:
     #build:
     #  context: ./dockerfiles
     #  dockerfile: Dockerfile_iri
-    hostname: iri
     restart: unless-stopped
     volumes:
       - ./volumes/iri/iota.ini:/iri/iota.ini:ro
       - ./volumes/iri/ixi:/iri/ixi:rw
       - ./volumes/iri/mainnetdb:/iri/mainnetdb:rw
       - /etc/localtime:/etc/localtime:ro
+    network_mode: "host"
     command: ["/usr/bin/java",
               "-XX:+CrashOnOutOfMemoryError",
               "-XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses",
@@ -27,7 +27,6 @@ services:
               #"-Xmx8G",
               "-Xms256m",
               #"-Xms2G",
-              "-Dlogback.configurationFile=/iri/conf/logback.xml",
               "-Djava.net.preferIPv4Stack=true",
               "-jar",
               "iri.jar",
@@ -49,12 +48,12 @@ services:
     #build:
     #  context: ./dockerfiles
     #  dockerfile: Dockerfile_nelson.cli
-    hostname: nelson.cli
     restart: unless-stopped
     volumes:
       - ./volumes/nelson.cli/data:/data:rw
       - ./volumes/nelson.cli/config.ini:/home/node/config.ini:ro
       - /etc/localtime:/etc/localtime:ro
+    network_mode: "host"
     command: "--config /home/node/config.ini"
     ports:
       - "18600:18600"
@@ -70,9 +69,8 @@ services:
     #build:
     #  context: ./dockerfiles
     #  dockerfile: Dockerfile_nelson.gui
-    hostname: nelson.gui
     restart: unless-stopped
-    command: "--apiHostname nelson.cli"
+    network_mode: "host"
     ports:
       - "5000:5000"
     logging:
@@ -86,12 +84,12 @@ services:
     #build:
     #  context: ./dockerfiles
     #  dockerfile: Dockerfile_field.cli
-    hostname: field.cli
     restart: unless-stopped
     volumes:
       - ./volumes/field.cli/config.ini:/usr/src/field/config.ini:ro
       - ./volumes/field.cli/root:/root
       - /etc/localtime:/etc/localtime:ro
+    network_mode: "host"
     command: "--config /usr/src/field/config.ini"
     ports:
       - "21310:21310"
