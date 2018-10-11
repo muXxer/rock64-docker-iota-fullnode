@@ -1,4 +1,4 @@
-ARG IRI_VERSION=1.5.3
+ARG IRI_VERSION=1.5.5
 FROM arm64v8/maven:3.5-jdk-8 as builder
 
 ARG REPO_ROCKSDB=https://github.com/jserv/rocksdb.git
