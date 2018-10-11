@@ -1,10 +1,12 @@
 ARG IRI_VERSION=1.5.5
 FROM arm64v8/maven:3.5-jdk-8 as builder
 
-ARG REPO_ROCKSDB=https://github.com/jserv/rocksdb.git
-ARG REPO_SNAPPY=https://github.com/yillkid/snappy-1.1.4.git
+#ARG REPO_ROCKSDB=https://github.com/jserv/rocksdb.git
+ARG REPO_ROCKSDB=https://github.com/facebook/rocksdb.git
+#ARG REPO_SNAPPY=https://github.com/yillkid/snappy-1.1.4.git
+ARG REPO_SNAPPY=https://github.com/google/snappy.git
 ARG REPO_IRI=https://github.com/muXxer/iri.git
-ARG ROCKSDB_VERSION=5.8.8
+ARG ROCKSDB_VERSION=5.15.10
 ARG ARCH_FLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a53"
 
 #ENV JAVA_HOME=/usr/lib/jvm/java-8-oracle
