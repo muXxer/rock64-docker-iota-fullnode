@@ -1,12 +1,10 @@
 ARG IRI_VERSION=1.5.5
 FROM arm64v8/maven:3.5-jdk-8 as builder
 
-#ARG REPO_ROCKSDB=https://github.com/jserv/rocksdb.git
 ARG REPO_ROCKSDB=https://github.com/facebook/rocksdb.git
-#ARG REPO_SNAPPY=https://github.com/yillkid/snappy-1.1.4.git
 ARG REPO_SNAPPY=https://github.com/google/snappy.git
 ARG REPO_IRI=https://github.com/muXxer/iri.git
-ARG ROCKSDB_VERSION=5.15.10
+ARG ROCKSDB_VERSION=5.17.0
 ARG ARCH_FLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a53"
 
 #ENV JAVA_HOME=/usr/lib/jvm/java-8-oracle
@@ -16,7 +14,8 @@ RUN apt-get update && apt-get install -y autotools-dev automake build-essential 
 
 # Clone RocksDB
 WORKDIR /iri-aarch64
-RUN git clone --depth=1 $REPO_ROCKSDB
+RUN git clone $REPO_ROCKSDB
+RUN git checkout 7dd1641048bde2e45c3e16d2e7b450b3914df1f4
 WORKDIR /iri-aarch64/rocksdb
 
 # Clone libsnappy
@@ -41,7 +40,7 @@ ENV M2_HOME=/usr/share/maven
 ENV M2=/usr/share/maven/bin
 
 WORKDIR /iri-aarch64/rocksdb/java/target/
-RUN mvn install:install-file -Dfile=rocksdbjni-5.8.8-linux64.jar -DgroupId=org.rocksdb -DartifactId=rocksdbjni -Dversion=5.8.8 -Dpackaging=jar
+RUN mvn install:install-file -Dfile=rocksdbjni-${ROCKSDB_VERSION}-linux64.jar -DgroupId=org.rocksdb -DartifactId=rocksdbjni -Dversion=${ROCKSDB_VERSION} -Dpackaging=jar
 
 # Build IRI
 WORKDIR /iri-aarch64
